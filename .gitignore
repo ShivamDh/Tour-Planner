@@ -49,7 +49,7 @@ node_modules
 *.log
 .nvm
 /bots/node_modules/
-pack-lock.json
+package-lock.json
 
 # BUCK
 .buckd
