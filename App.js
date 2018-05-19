@@ -27,16 +27,25 @@ export default class App extends Component<Props> {
 	constructor(props) {
 		super(props);
 
-		addressCount = 1;
-		this.addresses = [];
+		this.state = {
+			addresses: ['']
+		}
 	}
 
-	getAddressInput = (index) => {
-		return (
-			<View styles = {styles.addressLine}>
+	inputTextChanged = (text, index) => {
+		let {addresses} = this.state;
+	    addresses[index] = text;
+
+	    this.setState({addresses});
+	}
+
+	getAddressInputs = () => {
+		return this.state.addresses.map( (text, index) => (
+			<View styles = {styles.addressLine} key = {`input_${index}`}>
 				<TextInput
 					style = {styles.addressInput}
-					ref = {(element) => this.addresses[index] = element}
+					onChangeText = {(text) => this.inputTextChanged(text, index)}
+					value = {text}
 				/>
 				<Button
 					onPress = {() => this.deleteAddress(index)}
@@ -45,21 +54,24 @@ export default class App extends Component<Props> {
 					accessibilityLabel = "Delete this address"
 				/>
 			</View>
-		);
+		));
 	}
 
 	deleteAddress = (index) => {
-		console.log('delete index: ' + index);
+		let {addresses} = this.state;
+		addresses.splice(index, 1);
+
+		this.setState({addresses});
 	}
 
 	addAddress = () => {
-		
+		this.setState({addresses: [...this.state.addresses, '']});
 	}
 
 	render() {
 		return (
 			<View style={styles.container}>
-				{ this.getAddressInput(0) }
+				{ this.getAddressInputs() }
 				<Button
 					onPress = {() => this.addAddress()}
 					title = "Add Address"
@@ -92,6 +104,12 @@ const styles = StyleSheet.create({
 		borderWidth: 2,
 		paddingLeft: 10,
 		paddingRight: 10,
-	}
+	},
+	addressDeleteButton: {
+		flex: 0.2
+	},
+	addressAddButton: {
+		flex: 1
+	},
 
 });

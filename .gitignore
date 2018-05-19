@@ -38,10 +38,12 @@ project.xcworkspace
 # Android/IntelliJ
 #
 .idea
-.gradle
+android/.gradle/
 local.properties
 *.iml
-/android/
+android/build/
+android/app/build/
+*.class
 
 # node.js
 #
