@@ -4,7 +4,11 @@
 
 # Xcode
 #
-build/
+!**/*.xcodeproj
+!**/*.pbxproj
+!**/*.xcworkspacedata
+!**/*.xcsettings
+!**/*.xcscheme
 *.pbxuser
 !default.pbxuser
 *.mode1v3
@@ -22,24 +26,40 @@ DerivedData
 *.xcuserstate
 project.xcworkspace
 
+#Gradle
+/build/
+/RNTester/android/app/build/
+/RNTester/android/app/gradle/
+/RNTester/android/app/gradlew
+/RNTester/android/app/gradlew.bat
+/ReactAndroid/build/
+
+
 # Android/IntelliJ
 #
-build/
 .idea
 .gradle
 local.properties
 *.iml
+/android/
 
 # node.js
 #
-node_modules/
-npm-debug.log
-yarn-error.log
+node_modules
+*.log
+.nvm
+/bots/node_modules/
+pack-lock.json
 
 # BUCK
-buck-out/
-\.buckd/
-*.keystore
+.buckd
+buck-out
+/ReactAndroid/src/main/jni/prebuilt/lib/armeabi-v7a/
+/ReactAndroid/src/main/jni/prebuilt/lib/x86/
+/ReactAndroid/src/main/gen
+
+# Watchman
+.watchmanconfig
 
 # fastlane
 #
