@@ -8,6 +8,7 @@ import React, { Component } from 'react';
 import {
 	Button,
 	Platform,
+	ScrollView,
 	StyleSheet,
 	Text,
 	TextInput,
@@ -41,7 +42,7 @@ export default class App extends Component<Props> {
 
 	getAddressInputs = () => {
 		return this.state.addresses.map( (text, index) => (
-			<View styles = {styles.addressLine} key = {`input_${index}`}>
+			<View style = {styles.addressLine} key = {`input_${index}`}>
 				<TextInput
 					style = {styles.addressInput}
 					onChangeText = {(text) => this.inputTextChanged(text, index)}
@@ -70,7 +71,14 @@ export default class App extends Component<Props> {
 
 	render() {
 		return (
-			<View style={styles.container}>
+			<ScrollView contentContainerStyle = {styles.container}>
+				<Text style = {styles.header}>
+					TourPlanner
+				</Text>
+				<Text style = {styles.description}>
+					Add locations you would like to visit, and find the shortest trip
+				</Text>
+				<View style = {styles.emptyBox} />
 				{ this.getAddressInputs() }
 				<Button
 					onPress = {() => this.addAddress()}
@@ -78,35 +86,53 @@ export default class App extends Component<Props> {
 					style = {styles.addressAddButton}
 					accessibilityLabel = "Add address"
 				/>
-			</View>
+			</ScrollView>
 		);
 	}
 }
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
 		backgroundColor: '#F5FCFF',
 	},
+	header: {
+		fontSize: 30,
+		fontWeight: '700',
+		marginTop: 50,
+		marginBottom: 20
+	},
+	description: {
+		fontSize: 20,
+		flex: 0.8,
+		marginLeft: 30,
+		marginRight: 30,
+		marginBottom: 15
+	},
 	addressLine: {
 		flex: 1,
-		width: '100%',
-		height: 60,
 		flexDirection: 'row',
+		height: 50,
+		maxHeight: 50,
+		marginBottom: 20
 	},
 	addressInput: {
-		textAlign: 'left',
+		height: 50,
 		maxHeight: 50,
 		flex: 0.8,
 		borderColor: 'black',
 		borderWidth: 2,
 		paddingLeft: 10,
 		paddingRight: 10,
+		marginRight: 20
 	},
 	addressDeleteButton: {
-		flex: 0.2
+		width: 50,
+		height: 50,
+		maxHeight: 50,
+		marginTop: 10,
+		marginBottom: 10
 	},
 	addressAddButton: {
 		flex: 1
