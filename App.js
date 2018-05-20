@@ -7,13 +7,18 @@
 import React, { Component } from 'react';
 import {
 	Button,
+	Dimensions,
+	ImageBackground,
 	Platform,
 	ScrollView,
 	StyleSheet,
 	Text,
 	TextInput,
+	TouchableOpacity,
 	View
 } from 'react-native';
+
+var {height, width} = Dimensions.get('window');
 
 const instructions = Platform.select({
 	ios: 'Press Cmd+R to reload,\n' +
@@ -48,12 +53,17 @@ export default class App extends Component<Props> {
 					onChangeText = {(text) => this.inputTextChanged(text, index)}
 					value = {text}
 				/>
-				<Button
-					onPress = {() => this.deleteAddress(index)}
-					title = "X"
-					style = {styles.addressDeleteButton}
-					accessibilityLabel = "Delete this address"
-				/>
+				<TouchableOpacity
+					style = {styles.buttonContainer}
+					activeOpacity = {0.9}>
+					<Button
+						onPress = {() => this.deleteAddress(index)}
+						title = "X"
+						style = {styles.addressDeleteButton}
+						accessibilityLabel = "Delete this address"
+						color = "red"
+					/>
+				</TouchableOpacity>
 			</View>
 		));
 	}
@@ -70,22 +80,28 @@ export default class App extends Component<Props> {
 	}
 
 	render() {
+		const backgroundImage = require('./img/appBackground.png');
+
 		return (
 			<ScrollView contentContainerStyle = {styles.container}>
-				<Text style = {styles.header}>
-					TourPlanner
-				</Text>
-				<Text style = {styles.description}>
-					Add locations you would like to visit, and find the shortest trip
-				</Text>
-				<View style = {styles.emptyBox} />
-				{ this.getAddressInputs() }
-				<Button
-					onPress = {() => this.addAddress()}
-					title = "Add Address"
-					style = {styles.addressAddButton}
-					accessibilityLabel = "Add address"
-				/>
+				<ImageBackground
+					source = {backgroundImage} 
+					style = {styles.background}>
+					<Text style = {styles.header}>
+						TourPlanner
+					</Text>
+					<Text style = {styles.description}>
+						Add locations you would like to visit, and find the shortest trip
+					</Text>
+					<View style = {styles.emptyBox} />
+					{ this.getAddressInputs() }
+					<Button
+						onPress = {() => this.addAddress()}
+						title = "Add Address"
+						style = {styles.addressAddButton}
+						accessibilityLabel = "Add address"
+					/>
+				</ImageBackground>
 			</ScrollView>
 		);
 	}
@@ -96,14 +112,23 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 		backgroundColor: '#F5FCFF',
+		minHeight: height - 25
+	},
+	background: {
+		width: '100%',
+		height: '100%',
+		overflow: 'hidden'
 	},
 	header: {
+		color: 'black',
 		fontSize: 30,
 		fontWeight: '700',
 		marginTop: 50,
-		marginBottom: 20
+		marginBottom: 20,
+		marginLeft: 30
 	},
 	description: {
+		color: 'black',
 		fontSize: 20,
 		flex: 0.8,
 		marginLeft: 30,
@@ -115,7 +140,8 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		height: 50,
 		maxHeight: 50,
-		marginBottom: 20
+		marginBottom: 20,
+		marginLeft: 30
 	},
 	addressInput: {
 		height: 50,
@@ -127,14 +153,16 @@ const styles = StyleSheet.create({
 		paddingRight: 10,
 		marginRight: 20
 	},
+	buttonContainer: {
+		marginTop: 7,
+		width: 40,
+	},
 	addressDeleteButton: {
-		width: 50,
-		height: 50,
-		maxHeight: 50,
-		marginTop: 10,
-		marginBottom: 10
+		flex: 1,
 	},
 	addressAddButton: {
+		marginLeft: 100,
+		marginRight: 100,
 		flex: 1
 	},
 
