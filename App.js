@@ -49,15 +49,10 @@ export default class App extends Component<Props> {
 				/>
 				<TouchableOpacity
 					style = {styles.buttonContainer}
-					activeOpacity = {0.9}>
-					<Button
-						onPress = {() => this.deleteAddress(index)}
-						title = "X"
-						style = {styles.addressDeleteButton}
-						accessibilityLabel = "Delete this address"
-						color = "red"
-					/>
-				</TouchableOpacity>
+					onPress = {() => this.deleteAddress(index)}
+					activeOpacity = {0.9} >
+					<Text style={styles.addressDeleteButton}> X </Text>
+				</TouchableOpacity>	
 			</View>
 		));
 	}
@@ -81,7 +76,7 @@ export default class App extends Component<Props> {
 		let val = this.state.returnSameLocation ? 'True' : 'False';
 
 		return (
-			<Text>
+			<Text style = {styles.switchVal}>
 				{val}
 			</Text>
 		);
@@ -99,7 +94,7 @@ export default class App extends Component<Props> {
 						TourPlanner
 					</Text>
 					<Text style = {styles.description}>
-						Add locations you would like to visit, and find the shortest trip
+						Add locations you would like to visit, to find the shortest trip
 					</Text>
 					<View style = {styles.switchContainer}>
 						<Switch
@@ -108,18 +103,17 @@ export default class App extends Component<Props> {
 							onValueChange = {this.toggleSwitch}
 						/>
 						<Text style = {styles.switchText}>
-							Return to the same location:
+							Return to the same location: &nbsp;
 						</Text>
 						{this.getReturnSameLocationValue()}
 					</View>
 					<View style = {styles.emptyBox} />
 					{ this.getAddressInputs() }
-					<Button
+					<TouchableOpacity
 						onPress = {() => this.addAddress()}
-						title = "Add Address"
-						style = {styles.addressAddButton}
-						accessibilityLabel = "Add address"
-					/>
+						style = {styles.addressAddContainer}>
+						<Text style = {styles.addressAddButton}> ADD ADDRESS </Text>
+					</TouchableOpacity>
 				</ImageBackground>
 			</ScrollView>
 		);
@@ -151,20 +145,30 @@ const styles = StyleSheet.create({
 		fontSize: 20,
 		flex: 0.8,
 		marginLeft: 30,
-		marginRight: 30,
+		marginRight: 15,
 		marginBottom: 15
 	},
 	switchContainer: {
-		flex: 1,
+		flexDirection: 'row',
+		width: '100%',
+		marginLeft: 30,
+		marginRight: 15,
+		height: 40,
+		alignItems: 'center',
 	},
 	switch: {
-		flex: 0.1
+		marginRight: 10
 	},
 	switchText: {
-		flex: 0.8
+		marginTop: -2,
+		fontSize: 15,
+		color: '#1e1e1e',
 	},
 	switchVal: {
-		flex: 0.1
+		color: '#1e1e1e',
+		marginTop: -2,
+		fontSize: 15,
+		fontWeight: 'bold'
 	},
 	addressLine: {
 		flex: 1,
@@ -185,16 +189,32 @@ const styles = StyleSheet.create({
 		marginRight: 20
 	},
 	buttonContainer: {
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: 'red',
 		marginTop: 7,
-		width: 40,
+		width: 37,
+		height: 37,
+		borderRadius: 5,
 	},
 	addressDeleteButton: {
-		flex: 1,
+		color: 'white',
+		fontSize: 16,
+		fontWeight: '900',
+	},
+	addressAddContainer: {
+		alignItems: 'center',
+		justifyContent: 'center',
+		marginLeft: 30,
+		marginRight: 45,
+		backgroundColor: '#2080DF',
+		height: 35,
+		borderRadius: 10
 	},
 	addressAddButton: {
-		marginLeft: 100,
-		marginRight: 100,
-		flex: 1
+		color: 'white',
+		fontSize: 16,
+		fontWeight: '900',
 	},
 
 });
