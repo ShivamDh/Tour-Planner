@@ -9,9 +9,9 @@ import {
 	Button,
 	Dimensions,
 	ImageBackground,
-	Platform,
 	ScrollView,
 	StyleSheet,
+	Switch,
 	Text,
 	TextInput,
 	TouchableOpacity,
@@ -20,13 +20,6 @@ import {
 
 var {height, width} = Dimensions.get('window');
 
-const instructions = Platform.select({
-	ios: 'Press Cmd+R to reload,\n' +
-		'Cmd+D or shake for dev menu',
-	android: 'Double tap R on your keyboard to reload,\n' +
-		'Shake or press menu button for dev menu',
-});
-
 type Props = {};
 export default class App extends Component<Props> {
 
@@ -34,7 +27,8 @@ export default class App extends Component<Props> {
 		super(props);
 
 		this.state = {
-			addresses: ['']
+			addresses: [''],
+			returnSameLocation: false,
 		}
 	}
 
@@ -79,6 +73,20 @@ export default class App extends Component<Props> {
 		this.setState({addresses: [...this.state.addresses, '']});
 	}
 
+	toggleSwitch = (i) => {
+		this.setState({returnSameLocation: !this.state.returnSameLocation});
+	}
+
+	getReturnSameLocationValue = () => {
+		let val = this.state.returnSameLocation ? 'True' : 'False';
+
+		return (
+			<Text>
+				{val}
+			</Text>
+		);
+	}
+
 	render() {
 		const backgroundImage = require('./img/appBackground.png');
 
@@ -93,6 +101,17 @@ export default class App extends Component<Props> {
 					<Text style = {styles.description}>
 						Add locations you would like to visit, and find the shortest trip
 					</Text>
+					<View style = {styles.switchContainer}>
+						<Switch
+							style = {styles.switch}
+							value = {this.state.returnSameLocation}
+							onValueChange = {this.toggleSwitch}
+						/>
+						<Text style = {styles.switchText}>
+							Return to the same location:
+						</Text>
+						{this.getReturnSameLocationValue()}
+					</View>
 					<View style = {styles.emptyBox} />
 					{ this.getAddressInputs() }
 					<Button
@@ -120,7 +139,7 @@ const styles = StyleSheet.create({
 		overflow: 'hidden'
 	},
 	header: {
-		color: 'black',
+		color: '#1e1e1e',
 		fontSize: 30,
 		fontWeight: '700',
 		marginTop: 50,
@@ -128,12 +147,24 @@ const styles = StyleSheet.create({
 		marginLeft: 30
 	},
 	description: {
-		color: 'black',
+		color: '#1e1e1e',
 		fontSize: 20,
 		flex: 0.8,
 		marginLeft: 30,
 		marginRight: 30,
 		marginBottom: 15
+	},
+	switchContainer: {
+		flex: 1,
+	},
+	switch: {
+		flex: 0.1
+	},
+	switchText: {
+		flex: 0.8
+	},
+	switchVal: {
+		flex: 0.1
 	},
 	addressLine: {
 		flex: 1,
@@ -147,7 +178,7 @@ const styles = StyleSheet.create({
 		height: 50,
 		maxHeight: 50,
 		flex: 0.8,
-		borderColor: 'black',
+		borderColor: '#1e1e1e',
 		borderWidth: 2,
 		paddingLeft: 10,
 		paddingRight: 10,
