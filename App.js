@@ -18,6 +18,10 @@ import {
 	View
 } from 'react-native';
 
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+
+import { GOOGLE_API_KEY } from '../GoogleCredentials.js'
+
 var {height, width} = Dimensions.get('window');
 
 type Props = {};
@@ -29,14 +33,14 @@ export default class App extends Component<Props> {
 		this.state = {
 			addresses: [''],
 			returnSameLocation: false,
-		}
+		};
 	}
 
 	inputTextChanged = (text, index) => {
 		let {addresses} = this.state;
-	    addresses[index] = text;
+		addresses[index] = text;
 
-	    this.setState({addresses});
+		this.setState({addresses});
 	}
 
 	getAddressInputs = () => {
@@ -50,7 +54,7 @@ export default class App extends Component<Props> {
 				<TouchableOpacity
 					style = {styles.buttonContainer}
 					onPress = {() => this.deleteAddress(index)}
-					activeOpacity = {0.9} >
+					activeOpacity = {0.5} >
 					<Text style={styles.addressDeleteButton}> X </Text>
 				</TouchableOpacity>	
 			</View>
@@ -83,6 +87,7 @@ export default class App extends Component<Props> {
 	}
 
 	render() {
+		console.log('rerender');
 		const backgroundImage = require('./img/appBackground.png');
 
 		return (
@@ -110,10 +115,44 @@ export default class App extends Component<Props> {
 					<View style = {styles.emptyBox} />
 					{ this.getAddressInputs() }
 					<TouchableOpacity
+						activeOpacity = {0.5}
 						onPress = {() => this.addAddress()}
 						style = {styles.addressAddContainer}>
 						<Text style = {styles.addressAddButton}> ADD ADDRESS </Text>
 					</TouchableOpacity>
+					
+					
+
+					<GooglePlacesAutocomplete
+						placeholder='Search'
+						minLength={2}
+						autoFocus={false}
+						returnKeyType={'search'} 
+						listViewDisplayed='auto'    // true/false/undefined
+						fetchDetails={true}
+						renderDescription={row => row.description} // custom description render
+						onPress={(data, details = null) => { // 'details' is provided when fetchDetails = true
+							console.log(data, details);
+						}}
+						currentLocation={false}
+						query={{
+							// available options: https://developers.google.com/places/web-service/autocomplete
+							key: GOOGLE_API_KEY,
+							language: 'en', // language of the results
+							types: '' // default: 'geocode'
+						  }}
+						styles={{
+							textInputContainer: {
+								width: '70%'
+							}
+						}}
+						nearbyPlacesAPI='GoogleReverseGeocoding'
+						filterReverseGeocodingByTypes={['locality', 'administrative_area_level_3']}
+						debounce={250}
+					/>
+
+
+
 				</ImageBackground>
 			</ScrollView>
 		);
@@ -143,7 +182,6 @@ const styles = StyleSheet.create({
 	description: {
 		color: '#1e1e1e',
 		fontSize: 20,
-		flex: 0.8,
 		marginLeft: 30,
 		marginRight: 15,
 		marginBottom: 15
@@ -153,6 +191,7 @@ const styles = StyleSheet.create({
 		width: '100%',
 		marginLeft: 30,
 		marginRight: 15,
+		marginBottom: 15,
 		height: 40,
 		alignItems: 'center',
 	},
@@ -207,6 +246,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		marginLeft: 30,
 		marginRight: 45,
+		marginBottom: 20,
 		backgroundColor: '#2080DF',
 		height: 35,
 		borderRadius: 10
