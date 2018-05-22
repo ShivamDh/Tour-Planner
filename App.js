@@ -3,6 +3,7 @@ import {
 	Button,
 	Dimensions,
 	ImageBackground,
+	Keyboard,
 	ScrollView,
 	StyleSheet,
 	Switch,
@@ -25,32 +26,56 @@ export default class App extends Component<Props> {
 	constructor(props) {
 		super(props);
 
+	    this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.keyboardDidHide);
+
 		this.state = {
-			addresses: [],
+			addresses: ['', '', ''],
 			returnToStart: false,
+			listDisplayed: -1
 		};
 	}
 
-	inputTextChanged = (text, index) => {
-		let {addresses} = this.state;
-		addresses[index] = text;
+	componentWillUnmount () {
+		this.keyboardDidHideListener.remove();
+	}
 
-		this.setState({addresses});
+	keyboardDidHide = () => {
+		console.log('keyboard hid');
+		// this.setState({listDisplayed: -1});
+	}
+
+	addressChosen = (data, index) => {
+		let {addresses} = this.state;
+		addresses[index] = data.description;
+
+		this.setState({addresses, listDisplayed: -1});
+	}
+
+	getAddressLineStyling = (index) => {
+		console.log(index, this.state.listDisplayed);
+
+		return this.state.listDisplayed === index ? [styles.addressLine, styles.expandedAddressLine] : [styles.addressLine];
+	}
+
+	inputFocused = (index) => {
+		this.setState({listDisplayed: index});
 	}
 
 	getAddressInputs = () => {
 		return this.state.addresses.map( (text, index) => (
-			<View style = {styles.addressLine} key = {`input_${index}`}>
+			<View style={this.getAddressLineStyling(index)} key={`input_${index}`}>
 				<GooglePlacesAutocomplete
 					placeholder='Search'
 					minLength={2}
 					autoFocus={false}
 					returnKeyType={'search'} 
-					listViewDisplayed='auto'
 					fetchDetails={true}
 					renderDescription={row => row.description}
 					onPress={(data, details = null) => {
-						console.log(data, details);
+						this.addressChosen(data, details);
+					}}
+					textInputProps={{
+						onFocus: () => this.inputFocused(index)
 					}}
 					currentLocation={false}
 					query={{
@@ -61,7 +86,26 @@ export default class App extends Component<Props> {
 					styles={{
 						textInputContainer: {
 							flex: 1,
-							marginRight: 15
+							marginRight: 15,
+							backgroundColor: 'transparent',
+						    borderTopWidth: 0,
+						    borderBottomWidth: 0,
+						    flexDirection: 'row',
+						},
+						textInput: {
+						    backgroundColor: 'gray',
+						    height: 35,
+							maxHeight: 35,
+						    borderRadius: 5,
+						    paddingTop: 0,
+						    paddingBottom: 0,
+						    paddingLeft: 0,
+						    paddingRight: 0,
+						    marginTop: 0,
+						    marginBottom: 0,
+						    marginLeft: 0,
+						    marginRight: 0,
+						    fontSize: 18,
 						}
 					}}
 					nearbyPlacesAPI='GoogleReverseGeocoding'
@@ -108,12 +152,14 @@ export default class App extends Component<Props> {
 		const backgroundImage = require('./img/appBackground.png');
 
 		return (
-			<ScrollView contentContainerStyle = {styles.container}>
+			<ScrollView 
+				keyboardShouldPersistTaps="always"
+				contentContainerStyle={styles.container}>
 				<ImageBackground
 					source = {backgroundImage} 
 					style = {styles.background}>
 					<Text style = {styles.header}>
-						TourPlanner
+						Tour Planner
 					</Text>
 					<Text style = {styles.description}>
 						Add locations you would like to visit, to find the shortest trip
@@ -200,15 +246,18 @@ const styles = StyleSheet.create({
 		maxHeight: 50,
 		marginBottom: 20,
 		marginLeft: 30,
-		marginRight: 30
+		marginRight: 30,
+	},
+	expandedAddressLine: {
+		height: 250,
+		maxHeight: 250
 	},
 	buttonContainer: {
 		justifyContent: 'center',
 		alignItems: 'center',
 		backgroundColor: 'red',
-		marginTop: 7,
-		width: 37,
-		height: 37,
+		width: 35,
+		height: 35,
 		borderRadius: 5,
 	},
 	addressDeleteButton: {
