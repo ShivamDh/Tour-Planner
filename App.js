@@ -1,9 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, { Component } from 'react';
 import {
 	Button,
@@ -20,19 +14,20 @@ import {
 
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
-import { GOOGLE_API_KEY } from '../GoogleCredentials.js'
+import GOOGLE_CREDENTIALS from './GoogleCredentials';
 
 var {height, width} = Dimensions.get('window');
 
 type Props = {};
+
 export default class App extends Component<Props> {
 
 	constructor(props) {
 		super(props);
 
 		this.state = {
-			addresses: [''],
-			returnSameLocation: false,
+			addresses: [],
+			returnToStart: false,
 		};
 	}
 
@@ -46,10 +41,32 @@ export default class App extends Component<Props> {
 	getAddressInputs = () => {
 		return this.state.addresses.map( (text, index) => (
 			<View style = {styles.addressLine} key = {`input_${index}`}>
-				<TextInput
-					style = {styles.addressInput}
-					onChangeText = {(text) => this.inputTextChanged(text, index)}
-					value = {text}
+				<GooglePlacesAutocomplete
+					placeholder='Search'
+					minLength={2}
+					autoFocus={false}
+					returnKeyType={'search'} 
+					listViewDisplayed='auto'
+					fetchDetails={true}
+					renderDescription={row => row.description}
+					onPress={(data, details = null) => {
+						console.log(data, details);
+					}}
+					currentLocation={false}
+					query={{
+						key: GOOGLE_CREDENTIALS.key,
+						language: 'en', 
+						types: ''
+					  }}
+					styles={{
+						textInputContainer: {
+							flex: 1,
+							marginRight: 15
+						}
+					}}
+					nearbyPlacesAPI='GoogleReverseGeocoding'
+					filterReverseGeocodingByTypes={['locality', 'administrative_area_level_3']}
+					debounce={250}
 				/>
 				<TouchableOpacity
 					style = {styles.buttonContainer}
@@ -73,11 +90,11 @@ export default class App extends Component<Props> {
 	}
 
 	toggleSwitch = (i) => {
-		this.setState({returnSameLocation: !this.state.returnSameLocation});
+		this.setState({returnToStart: !this.state.returnToStart});
 	}
 
-	getReturnSameLocationValue = () => {
-		let val = this.state.returnSameLocation ? 'True' : 'False';
+	getreturnToStartValue = () => {
+		let val = this.state.returnToStart ? 'True' : 'False';
 
 		return (
 			<Text style = {styles.switchVal}>
@@ -104,13 +121,13 @@ export default class App extends Component<Props> {
 					<View style = {styles.switchContainer}>
 						<Switch
 							style = {styles.switch}
-							value = {this.state.returnSameLocation}
+							value = {this.state.returnToStart}
 							onValueChange = {this.toggleSwitch}
 						/>
 						<Text style = {styles.switchText}>
 							Return to the same location: &nbsp;
 						</Text>
-						{this.getReturnSameLocationValue()}
+						{this.getreturnToStartValue()}
 					</View>
 					<View style = {styles.emptyBox} />
 					{ this.getAddressInputs() }
@@ -120,39 +137,6 @@ export default class App extends Component<Props> {
 						style = {styles.addressAddContainer}>
 						<Text style = {styles.addressAddButton}> ADD ADDRESS </Text>
 					</TouchableOpacity>
-					
-					
-
-					<GooglePlacesAutocomplete
-						placeholder='Search'
-						minLength={2}
-						autoFocus={false}
-						returnKeyType={'search'} 
-						listViewDisplayed='auto'    // true/false/undefined
-						fetchDetails={true}
-						renderDescription={row => row.description} // custom description render
-						onPress={(data, details = null) => { // 'details' is provided when fetchDetails = true
-							console.log(data, details);
-						}}
-						currentLocation={false}
-						query={{
-							// available options: https://developers.google.com/places/web-service/autocomplete
-							key: GOOGLE_API_KEY,
-							language: 'en', // language of the results
-							types: '' // default: 'geocode'
-						  }}
-						styles={{
-							textInputContainer: {
-								width: '70%'
-							}
-						}}
-						nearbyPlacesAPI='GoogleReverseGeocoding'
-						filterReverseGeocodingByTypes={['locality', 'administrative_area_level_3']}
-						debounce={250}
-					/>
-
-
-
 				</ImageBackground>
 			</ScrollView>
 		);
@@ -215,17 +199,8 @@ const styles = StyleSheet.create({
 		height: 50,
 		maxHeight: 50,
 		marginBottom: 20,
-		marginLeft: 30
-	},
-	addressInput: {
-		height: 50,
-		maxHeight: 50,
-		flex: 0.8,
-		borderColor: '#1e1e1e',
-		borderWidth: 2,
-		paddingLeft: 10,
-		paddingRight: 10,
-		marginRight: 20
+		marginLeft: 30,
+		marginRight: 30
 	},
 	buttonContainer: {
 		justifyContent: 'center',
