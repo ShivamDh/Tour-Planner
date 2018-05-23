@@ -40,7 +40,6 @@ export default class App extends Component<Props> {
 	}
 
 	keyboardDidHide = () => {
-		console.log('keyboard hid');
 		// this.setState({listDisplayed: -1});
 	}
 
@@ -52,8 +51,6 @@ export default class App extends Component<Props> {
 	}
 
 	getAddressLineStyling = (index) => {
-		console.log(index, this.state.listDisplayed);
-
 		return this.state.listDisplayed === index ? [styles.addressLine, styles.expandedAddressLine] : [styles.addressLine];
 	}
 
@@ -61,11 +58,43 @@ export default class App extends Component<Props> {
 		this.setState({listDisplayed: index});
 	}
 
+	getAutoCompleteStyling = () => {
+		return {
+			textInputContainer: {
+				flex: 1,
+				marginRight: 15,
+				backgroundColor: 'transparent',
+			    borderTopWidth: 0,
+			    borderBottomWidth: 0,
+			    flexDirection: 'row',
+			    height: 35,
+			    maxHeight: 35,
+			},
+			textInput: {
+				color: 'white',
+			    backgroundColor: '#afafaf',
+			    height: 35,
+				maxHeight: 35,
+			    borderRadius: 5,
+			    paddingTop: 0,
+			    paddingBottom: 0,
+			    paddingLeft: 10,
+			    paddingRight: 0,
+			    marginTop: 0,
+			    marginBottom: 0,
+			    marginLeft: 0,
+			    marginRight: 5,
+			    fontSize: 18,
+			}
+		}
+	}
+
 	getAddressInputs = () => {
 		return this.state.addresses.map( (text, index) => (
 			<View style={this.getAddressLineStyling(index)} key={`input_${index}`}>
 				<GooglePlacesAutocomplete
 					placeholder='Search'
+					placeholderTextColor='white'
 					minLength={2}
 					autoFocus={false}
 					returnKeyType={'search'} 
@@ -82,32 +111,9 @@ export default class App extends Component<Props> {
 						key: GOOGLE_CREDENTIALS.key,
 						language: 'en', 
 						types: ''
-					  }}
-					styles={{
-						textInputContainer: {
-							flex: 1,
-							marginRight: 15,
-							backgroundColor: 'transparent',
-						    borderTopWidth: 0,
-						    borderBottomWidth: 0,
-						    flexDirection: 'row',
-						},
-						textInput: {
-						    backgroundColor: 'gray',
-						    height: 35,
-							maxHeight: 35,
-						    borderRadius: 5,
-						    paddingTop: 0,
-						    paddingBottom: 0,
-						    paddingLeft: 0,
-						    paddingRight: 0,
-						    marginTop: 0,
-						    marginBottom: 0,
-						    marginLeft: 0,
-						    marginRight: 0,
-						    fontSize: 18,
-						}
 					}}
+					getDefaultValue={this.defaultValueFunc}
+					styles={ this.getAutoCompleteStyling() }
 					nearbyPlacesAPI='GoogleReverseGeocoding'
 					filterReverseGeocodingByTypes={['locality', 'administrative_area_level_3']}
 					debounce={250}
@@ -126,11 +132,11 @@ export default class App extends Component<Props> {
 		let {addresses} = this.state;
 		addresses.splice(index, 1);
 
-		this.setState({addresses});
+		this.setState({addresses, listDisplayed: -1});
 	}
 
 	addAddress = () => {
-		this.setState({addresses: [...this.state.addresses, '']});
+		this.setState({addresses: [...this.state.addresses, ''], listDisplayed: -1});
 	}
 
 	toggleSwitch = (i) => {
@@ -148,7 +154,6 @@ export default class App extends Component<Props> {
 	}
 
 	render() {
-		console.log('rerender');
 		const backgroundImage = require('./img/appBackground.png');
 
 		return (
@@ -175,7 +180,7 @@ export default class App extends Component<Props> {
 						</Text>
 						{this.getreturnToStartValue()}
 					</View>
-					<View style = {styles.emptyBox} />
+					<View ref={(el) => this.addressAddContainer = el}/>
 					{ this.getAddressInputs() }
 					<TouchableOpacity
 						activeOpacity = {0.5}
