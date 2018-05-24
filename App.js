@@ -40,7 +40,10 @@ export default class App extends Component<Props> {
 	}
 
 	keyboardDidHide = () => {
-		// this.setState({listDisplayed: -1});
+		const textTooShort = this.state.addresses[this.state.listDisplayed].length < 2;
+		const listDisplayed = textTooShort ? -1 : this.state.listDisplayed;
+
+		this.setState({listDisplayed});
 	}
 
 	addressChosen = (data, index) => {
@@ -51,11 +54,20 @@ export default class App extends Component<Props> {
 	}
 
 	getAddressLineStyling = (index) => {
-		return this.state.listDisplayed === index ? [styles.addressLine, styles.expandedAddressLine] : [styles.addressLine];
+		return this.state.listDisplayed === index ?
+			[styles.addressLine, styles.expandedAddressLine] :
+			[styles.addressLine];
 	}
 
 	inputFocused = (index) => {
 		this.setState({listDisplayed: index});
+	}
+
+	inputChanged = (text, index) => {
+		let {addresses} = this.state;
+		addresses[index] = text;
+
+		this.setState({addresses});
 	}
 
 	getAutoCompleteStyling = () => {
@@ -104,7 +116,8 @@ export default class App extends Component<Props> {
 						this.addressChosen(data, details);
 					}}
 					textInputProps={{
-						onFocus: () => this.inputFocused(index)
+						onFocus: () => this.inputFocused(index),
+						onChangeText: (txt) => this.inputChanged(txt, index)
 					}}
 					currentLocation={false}
 					query={{
@@ -153,6 +166,10 @@ export default class App extends Component<Props> {
 		);
 	}
 
+	mapRoute = () => {
+		console.log('map');
+	}
+
 	render() {
 		const backgroundImage = require('./img/appBackground.png');
 
@@ -187,6 +204,12 @@ export default class App extends Component<Props> {
 						onPress = {() => this.addAddress()}
 						style = {styles.addressAddContainer}>
 						<Text style = {styles.addressAddButton}> ADD ADDRESS </Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						activeOpacity = {0.5}
+						onPress = {() => this.mapRoute()}
+						style = {styles.mapRouteButton}>
+						<Text style = {styles.mapRouteText}> MAP ROUTE </Text>
 					</TouchableOpacity>
 				</ImageBackground>
 			</ScrollView>
@@ -273,17 +296,34 @@ const styles = StyleSheet.create({
 	addressAddContainer: {
 		alignItems: 'center',
 		justifyContent: 'center',
+		marginTop: -10,
 		marginLeft: 30,
 		marginRight: 45,
 		marginBottom: 20,
 		backgroundColor: '#2080DF',
 		height: 35,
-		borderRadius: 10
+		borderRadius: 10,
+		width: '60%'
 	},
 	addressAddButton: {
 		color: 'white',
 		fontSize: 16,
 		fontWeight: '900',
 	},
-
+	mapRouteButton: {
+		alignItems: 'center',
+		justifyContent: 'center',
+		marginLeft: 30,
+		marginRight: 45,
+		marginBottom: 20,
+		backgroundColor: '#0ba322',
+		height: 50,
+		borderRadius: 10,
+		width: '60%'
+	},
+	mapRouteText: {
+		color: 'white',
+		fontSize: 20,
+		fontWeight: '900'
+	}
 });
