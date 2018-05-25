@@ -200,6 +200,24 @@ export default class App extends Component<Props> {
 
 			return;
 		}
+
+		MapsDistance.get({
+			origins: addresses,
+			destinations: addresses
+		}, (err, data) => {
+		 	if (err) {
+				console.log(err);
+				return;
+			}
+
+			let foundAddresses = [];
+
+			for (let i = 1; i <= addressLength; ++i) {
+				foundAddresses.push(data[i*i - 1].origin);
+			}
+
+			this.setState({addresses: foundAddresses, routeData: data});
+		});
 	}
 
 	render() {
@@ -210,21 +228,21 @@ export default class App extends Component<Props> {
 				keyboardShouldPersistTaps="always"
 				contentContainerStyle={styles.container}>
 				<ImageBackground
-					source = {backgroundImage} 
-					style = {styles.background}>
-					<Text style = {styles.header}>
+					source={backgroundImage} 
+					style={styles.background}>
+					<Text style={styles.header}>
 						Tour Planner
 					</Text>
-					<Text style = {styles.description}>
+					<Text style={styles.description}>
 						Add locations you would like to visit, to find the shortest trip
 					</Text>
-					<View style = {styles.switchContainer}>
+					<View style={styles.switchContainer}>
 						<Switch
-							style = {styles.switch}
-							value = {this.state.returnToStart}
-							onValueChange = {this.toggleSwitch}
+							style={styles.switch}
+							value={this.state.returnToStart}
+							onValueChange={this.toggleSwitch}
 						/>
-						<Text style = {styles.switchText}>
+						<Text style={styles.switchText}>
 							Return to the same location: &nbsp;
 						</Text>
 						{this.getreturnToStartValue()}
@@ -232,16 +250,16 @@ export default class App extends Component<Props> {
 					<View ref={(el) => this.addressAddContainer = el}/>
 					{ this.getAddressInputs() }
 					<TouchableOpacity
-						activeOpacity = {0.5}
-						onPress = {() => this.addAddress()}
-						style = {styles.addressAddContainer}>
-						<Text style = {styles.addressAddButton}> ADD ADDRESS </Text>
+						activeOpacity={0.5}
+						onPress={() => this.addAddress()}
+						style={styles.addressAddContainer}>
+						<Text style={styles.addressAddButton}> ADD ADDRESS </Text>
 					</TouchableOpacity>
 					<TouchableOpacity
-						activeOpacity = {0.5}
-						onPress = {() => this.mapRoute()}
-						style = {styles.mapRouteButton}>
-						<Text style = {styles.mapRouteText}> MAP ROUTE </Text>
+						activeOpacity={0.5}
+						onPress={() => this.mapRoute()}
+						style={styles.mapRouteButton}>
+						<Text style={styles.mapRouteText}> MAP ROUTE </Text>
 					</TouchableOpacity>
 				</ImageBackground>
 			</ScrollView>
