@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {
+	Alert,
 	Button,
 	Dimensions,
 	ImageBackground,
@@ -14,6 +15,8 @@ import {
 } from 'react-native';
 
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+
+import MapsDistance from './MapsDistance'
 
 import GOOGLE_CREDENTIALS from './GoogleCredentials';
 
@@ -31,7 +34,8 @@ export default class App extends Component<Props> {
 		this.state = {
 			addresses: ['', '', ''],
 			returnToStart: false,
-			listDisplayed: -1
+			listDisplayed: -1,
+			routeData: []
 		};
 	}
 
@@ -40,13 +44,17 @@ export default class App extends Component<Props> {
 	}
 
 	keyboardDidHide = () => {
+		if (this.state.listDisplayed === -1) {
+			return;
+		}
+
 		const textTooShort = this.state.addresses[this.state.listDisplayed].length < 2;
 		const listDisplayed = textTooShort ? -1 : this.state.listDisplayed;
 
 		this.setState({listDisplayed});
 	}
 
-	addressChosen = (data, index) => {
+	addressChosen = (index, data) => {
 		let {addresses} = this.state;
 		addresses[index] = data.description;
 
@@ -91,7 +99,7 @@ export default class App extends Component<Props> {
 			    paddingTop: 0,
 			    paddingBottom: 0,
 			    paddingLeft: 10,
-			    paddingRight: 0,
+			    paddingRight: 10,
 			    marginTop: 0,
 			    marginBottom: 0,
 			    marginLeft: 0,
@@ -112,8 +120,8 @@ export default class App extends Component<Props> {
 					returnKeyType={'search'} 
 					fetchDetails={true}
 					renderDescription={row => row.description}
-					onPress={(data, details = null) => {
-						this.addressChosen(data, details);
+					onPress={(data) => {
+						this.addressChosen(index, data);
 					}}
 					textInputProps={{
 						onFocus: () => this.inputFocused(index),
@@ -167,7 +175,31 @@ export default class App extends Component<Props> {
 	}
 
 	mapRoute = () => {
-		console.log('map');
+		// checking for any empty strings
+		let addresses = this.state.addresses.reduce( (addresses, address) => {
+			return (address.length === 0 || !address.trim()) ? addresses : [...addresses, address];
+		}, []);
+
+		const addressLength = addresses.length;
+
+		if (addressLength < 3) {
+			let addressMsg = '';
+			if (addressLength < 1) {
+				addressMsg = 'No locations entered. Try Again';
+			} else if (addressLength < 2) {
+				addressMsg = 'Only one location entered, need two for a route. Try Again';
+			} else {
+				addressMsg = 'Two locations entered, shortest journey is from one to another. Try Again';
+			}
+
+			Alert.alert(
+				'Invalid Number of Addresses',
+				addressMsg,
+				[ {text: 'OK', onPress: () => {}} ]
+			);
+
+			return;
+		}
 	}
 
 	render() {
