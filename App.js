@@ -31,6 +31,8 @@ export default class App extends Component<Props> {
 
 	    this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.keyboardDidHide);
 
+	    this.route = "";
+
 		this.state = {
 			addresses: ['', '', ''],
 			returnToStart: false,
@@ -161,7 +163,9 @@ export default class App extends Component<Props> {
 	}
 
 	toggleSwitch = (i) => {
-		this.setState({returnToStart: !this.state.returnToStart});
+		this.setState({returnToStart: !this.state.returnToStart} , () => {
+		    this.route = this.calcTSPSoln();
+		});
 	}
 
 	getreturnToStartValue = () => {
@@ -216,8 +220,34 @@ export default class App extends Component<Props> {
 				foundAddresses.push(data[i*i - 1].origin);
 			}
 
-			this.setState({addresses: foundAddresses, routeData: data});
+			this.setState({addresses: foundAddresses, routeData: data}, () => {
+				this.route = this.calcTSPSoln();
+			});
 		});
+	}
+
+	getShortestRoute = () => {
+		return "The shortest route is: \n" + this.route;
+	}
+
+	calcTSPSoln = () => {
+		let minCost = Number.MAX_SAFE_INTEGER;
+		let minRoute = [];
+
+		for (let i = 0; i < this.state.addresses.length; ++i) {
+			let subProb = this.calcTSPSubSoln(i);
+			if (subProb.cost < minCost) {
+				minCost = subProb.cost;
+				minRoute = subProb.route;
+			}
+		}
+
+		let route = minRoute[0].toString();
+		for (let j = 1; j < minRoute.length; ++j) {
+			route += "->" + minRoute[j].toString();
+		}
+
+		return route;
 	}
 
 	render() {
@@ -261,6 +291,9 @@ export default class App extends Component<Props> {
 						style={styles.mapRouteButton}>
 						<Text style={styles.mapRouteText}> MAP ROUTE </Text>
 					</TouchableOpacity>
+					<Text style={styles.shortestRouteText}>
+						{ this.getShortestRoute() }
+					</Text>
 				</ImageBackground>
 			</ScrollView>
 		);
@@ -375,5 +408,12 @@ const styles = StyleSheet.create({
 		color: 'white',
 		fontSize: 20,
 		fontWeight: '900'
+	},
+	shortestRouteText: {
+		color: '#1e1e1e',
+		fontSize: 17,
+		marginLeft: 30,
+		marginRight: 15,
+		marginBottom: 15
 	}
 });
