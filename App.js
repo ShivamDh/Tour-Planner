@@ -31,14 +31,15 @@ export default class App extends Component<Props> {
 
 	    this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.keyboardDidHide);
 
-	    this.route = "";
-
 		this.state = {
 			addresses: ['', '', ''],
 			returnToStart: false,
 			listDisplayed: -1,
-			routeData: []
+			routeData: [],
+			route: ""
 		};
+
+		this.addressInputs = [];
 	}
 
 	componentWillUnmount () {
@@ -50,10 +51,9 @@ export default class App extends Component<Props> {
 			return;
 		}
 
-		const textTooShort = this.state.addresses[this.state.listDisplayed].length < 2;
-		const listDisplayed = textTooShort ? -1 : this.state.listDisplayed;
+		this.addressInputs[this.state.listDisplayed].state.listViewDisplayed = false;
 
-		this.setState({listDisplayed});
+		this.setState({listDisplayed: -1});
 	}
 
 	addressChosen = (index, data) => {
@@ -70,14 +70,16 @@ export default class App extends Component<Props> {
 	}
 
 	inputFocused = (index) => {
+		this.addressInputs[index].state.listViewDisplayed = true;
+
 		this.setState({listDisplayed: index});
 	}
 
 	inputChanged = (text, index) => {
 		let {addresses} = this.state;
 		addresses[index] = text;
-
-		this.setState({addresses});
+		
+		this.setState({addresses, listDisplayed: index});
 	}
 
 	getAutoCompleteStyling = () => {
@@ -115,6 +117,7 @@ export default class App extends Component<Props> {
 		return this.state.addresses.map( (text, index) => (
 			<View style={this.getAddressLineStyling(index)} key={`input_${index}`}>
 				<GooglePlacesAutocomplete
+					ref={(el) => this.addressInputs[index] = el}
 					placeholder='Search'
 					placeholderTextColor='white'
 					minLength={2}
@@ -153,6 +156,11 @@ export default class App extends Component<Props> {
 
 	deleteAddress = (index) => {
 		let {addresses} = this.state;
+
+		for (let i = index; i < addresses.length - 1; ++i) {
+			this.addressInputs[i].state.text = this.addressInputs[i+1].state.text
+		}
+
 		addresses.splice(index, 1);
 
 		this.setState({addresses, listDisplayed: -1});
@@ -163,9 +171,7 @@ export default class App extends Component<Props> {
 	}
 
 	toggleSwitch = (i) => {
-		this.setState({returnToStart: !this.state.returnToStart} , () => {
-		    this.route = this.calcTSPSoln();
-		});
+		this.setState({returnToStart: !this.state.returnToStart});
 	}
 
 	getreturnToStartValue = () => {
@@ -216,38 +222,45 @@ export default class App extends Component<Props> {
 
 			let foundAddresses = [];
 
-			for (let i = 1; i <= addressLength; ++i) {
-				foundAddresses.push(data[i*i - 1].origin);
+			for (let i = 0; i < addresses.length; ++i) {
+				foundAddresses.push(data[i*addresses.length].origin);
+				this.addressInputs[i].state.text = data[i*addresses.length].origin;
 			}
 
 			this.setState({addresses: foundAddresses, routeData: data}, () => {
-				this.route = this.calcTSPSoln();
+				let minRoute = this.calcTSPSoln();
+				this.setState({route: minRoute.route, routeDistance: minRoute.distance});
 			});
 		});
-	}
-
-	getShortestRoute = () => {
-		return "The shortest route is: \n" + this.route;
 	}
 
 	calcTSPSoln = () => {
 		let minCost = Number.MAX_SAFE_INTEGER;
 		let minRoute = [];
 
+		const allCities = [...Array(this.state.addresses.length).keys()];
+
 		for (let i = 0; i < this.state.addresses.length; ++i) {
-			let subProb = this.calcTSPSubSoln(i);
+			let remainingCitiesArr = [...allCities];
+			remainingCitiesArr.splice(remainingCitiesArr.indexOf(i), 1);
+
+			// calculate each subproblem with recursive nature
+			
 			if (subProb.cost < minCost) {
 				minCost = subProb.cost;
-				minRoute = subProb.route;
+				minRoute = [i, ...subProb.route];
 			}
 		}
 
-		let route = minRoute[0].toString();
+		let route = (minRoute[0] + 1).toString();
 		for (let j = 1; j < minRoute.length; ++j) {
-			route += "->" + minRoute[j].toString();
+			route += " -> " + (minRoute[j] + 1).toString();
 		}
 
-		return route;
+		return {
+			route,
+			distance: Math.round(minCost/1000)
+		};
 	}
 
 	render() {
@@ -277,7 +290,6 @@ export default class App extends Component<Props> {
 						</Text>
 						{this.getreturnToStartValue()}
 					</View>
-					<View ref={(el) => this.addressAddContainer = el}/>
 					{ this.getAddressInputs() }
 					<TouchableOpacity
 						activeOpacity={0.5}
@@ -411,7 +423,7 @@ const styles = StyleSheet.create({
 	},
 	shortestRouteText: {
 		color: '#1e1e1e',
-		fontSize: 17,
+		fontSize: 18,
 		marginLeft: 30,
 		marginRight: 15,
 		marginBottom: 15
