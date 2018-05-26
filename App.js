@@ -234,6 +234,16 @@ export default class App extends Component<Props> {
 		});
 	}
 
+	getShortestRoute = () => {
+		if (this.state.route) {
+			let viewText = "The shortest route is:\n\t" + this.state.route;
+			viewText += "\nwith a distance of " + this.state.routeDistance + "km";
+
+			return viewText;
+		}
+
+	}
+
 	calcTSPSoln = () => {
 		let minCost = Number.MAX_SAFE_INTEGER;
 		let minRoute = [];
@@ -244,7 +254,7 @@ export default class App extends Component<Props> {
 			let remainingCitiesArr = [...allCities];
 			remainingCitiesArr.splice(remainingCitiesArr.indexOf(i), 1);
 
-			// calculate each subproblem with recursive nature
+			let subProb = this.calcTSPSubSoln(i, i, remainingCitiesArr);
 			
 			if (subProb.cost < minCost) {
 				minCost = subProb.cost;
@@ -261,6 +271,27 @@ export default class App extends Component<Props> {
 			route,
 			distance: Math.round(minCost/1000)
 		};
+	}
+
+	calcTSPSubSoln = (startCity, currentCity, remainingCities) => {
+		const { addresses, routeData } = this.state;
+
+		if (remainingCities.length === 1) {
+			if (this.state.returnToStart) {
+				return {
+					cost: routeData[currentCity*addresses.length + remainingCities[0]].distanceValue +
+						routeData[remainingCities[0]*addresses.length + startCity].distanceValue,
+					route: [remainingCities[0], startCity]
+				}
+			} else {
+				return {
+					cost: routeData[currentCity*addresses.length + remainingCities[0]].distanceValue,
+					route: [remainingCities[0]]
+				}
+			}
+		}
+
+		return {}
 	}
 
 	render() {
