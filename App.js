@@ -51,6 +51,7 @@ export default class App extends Component<Props> {
 			return;
 		}
 
+		// open up list view from the Google Autocomplete Input
 		this.addressInputs[this.state.listDisplayed].state.listViewDisplayed = false;
 
 		this.setState({listDisplayed: -1});
@@ -60,6 +61,7 @@ export default class App extends Component<Props> {
 		let {addresses} = this.state;
 		addresses[index] = data.description;
 
+		// close the list, no results shown if selection is picked
 		this.setState({addresses, listDisplayed: -1});
 	}
 
@@ -70,6 +72,7 @@ export default class App extends Component<Props> {
 	}
 
 	inputFocused = (index) => {
+		// open up list view, trigger the state manually
 		this.addressInputs[index].state.listViewDisplayed = true;
 
 		this.setState({listDisplayed: index});
@@ -157,10 +160,12 @@ export default class App extends Component<Props> {
 	deleteAddress = (index) => {
 		let {addresses} = this.state;
 
+		// move up addresses within the Google Autocomplete inputs, not controlled inputs
 		for (let i = index; i < addresses.length - 1; ++i) {
 			this.addressInputs[i].state.text = this.addressInputs[i+1].state.text
 		}
 
+		// delete specific address from the component state
 		addresses.splice(index, 1);
 
 		this.setState({addresses, listDisplayed: -1});
@@ -185,13 +190,14 @@ export default class App extends Component<Props> {
 	}
 
 	mapRoute = () => {
-		// checking for any empty strings
+		// removing any empty string addresses
 		let addresses = this.state.addresses.reduce( (addresses, address) => {
 			return (address.length === 0 || !address.trim()) ? addresses : [...addresses, address];
 		}, []);
 
 		const addressLength = addresses.length;
 
+		// do not allow for calculation if number of addresses < 3
 		if (addressLength < 3) {
 			let addressMsg = '';
 			if (addressLength < 1) {
@@ -216,10 +222,10 @@ export default class App extends Component<Props> {
 			destinations: addresses
 		}, (err, data) => {
 		 	if (err) {
-				console.log(err);
 				return;
 			}
 
+			// replace any incomplete addresses within inputs with official addresses used
 			let foundAddresses = [];
 
 			for (let i = 0; i < addresses.length; ++i) {
@@ -227,6 +233,7 @@ export default class App extends Component<Props> {
 				this.addressInputs[i].state.text = data[i*addresses.length].origin;
 			}
 
+			// calculate the solution for the given locations
 			this.setState({addresses: foundAddresses, routeData: data}, () => {
 				let minRoute = this.calcTSPSoln();
 				this.setState({route: minRoute.route, routeDistance: minRoute.distance});
@@ -291,7 +298,27 @@ export default class App extends Component<Props> {
 			}
 		}
 
-		return {}
+		let minCost = Number.MAX_SAFE_INTEGER;
+		let minRoute = [];
+
+		remainingCities.forEach( (remainingCity) => {
+			let cost = routeData[currentCity*addresses.length + remainingCity].distanceValue;
+
+			let leftCities = [...remainingCities];
+			leftCities.splice(leftCities.indexOf(remainingCity), 1);
+
+			let subCalcuation = this.calcTSPSubSoln(startCity, remainingCity, leftCities);
+
+			if (cost + subCalcuation.cost < minCost) {
+				minCost = cost + subCalcuation.cost;
+				minRoute = [remainingCity, ...subCalcuation.route];
+			}
+		});
+
+		return {
+			cost: minCost,
+			route: minRoute
+		};
 	}
 
 	render() {
